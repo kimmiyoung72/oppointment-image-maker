@@ -1,0 +1,54 @@
+<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#FEE500"><link rel="manifest" href="manifest.webmanifest">
+<title>약속 이미지 메이커</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f7f7;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#222}
+.wrap{max-width:760px;margin:auto;padding:16px}.card{background:#fff;border-radius:22px;padding:16px;margin:14px 0;box-shadow:0 6px 22px #00000010}
+h1{margin:6px 0 4px;font-size:25px}.lead,.tip{color:#777;font-size:14px;line-height:1.5}
+label{display:block;font-weight:800;font-size:14px;margin:12px 0 6px}
+input,textarea{width:100%;padding:13px;border:1px solid #e7e7e7;border-radius:14px;font-size:16px}textarea{min-height:78px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button,a.btn{width:100%;display:block;border:0;border-radius:14px;padding:14px;margin-top:10px;text-align:center;text-decoration:none;font-size:16px;font-weight:800}
+.primary{background:#FEE500;color:#3A2F20}.secondary{background:#f2f2f2;color:#333}.install{background:#fff8cc;color:#594a00;border:1px solid #f2dd5a}
+#preview{display:none;width:100%;border-radius:14px;box-shadow:0 10px 26px #00000025}
+#status{margin-top:10px;padding:11px;border-radius:12px;background:#fff9d8;color:#5b4c00;font-size:14px}
+canvas{display:none}@media(max-width:420px){.row{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<h1>약속 이미지 메이커</h1><p class="lead">고객과의 약속을 카카오톡에 보내기 좋은 이미지로 만듭니다.</p>
+<button id="installBtn" class="install" style="display:none">홈 화면에 앱 설치</button>
+<div class="card">
+<label>고객명</label><input id="customer" placeholder="예: 김민지 고객님">
+<div class="row"><div><label>날짜</label><input id="date" type="date"></div><div><label>시간</label><input id="time" type="time" value="14:00"></div></div>
+<label>장소</label><input id="place" placeholder="예: 성북구 ○○카페 2층">
+<label>상담 내용</label><input id="purpose" value="보험 보장 점검 및 계약 관리 상담">
+<label>안내 문구</label><textarea id="memo">약속 시간에 맞춰 찾아뵙겠습니다.
+변경이 필요하시면 편하게 연락 주세요.</textarea>
+<div class="row"><div><label>담당자</label><input id="manager" value="김미영 팀장"></div><div><label>연락처</label><input id="phone" placeholder="010-0000-0000"></div></div>
+<label>하단 문구</label><input id="slogan" value="가입보다 관리가 중요합니다.">
+<button id="makeBtn" class="primary">이미지 만들기</button><div id="status">정보를 입력한 뒤 버튼을 눌러주세요.</div>
+</div>
+<div class="card"><img id="preview"><a id="downloadBtn" class="btn secondary" style="display:none">PNG 저장</a>
+<button id="shareBtn" class="secondary" style="display:none">카카오톡 등으로 공유</button>
+<p class="tip">저장 이미지는 보통 휴대폰의 다운로드 폴더에 들어갑니다.</p></div>
+<canvas id="canvas" width="1080" height="1350"></canvas></div>
+<script>
+const $=id=>document.getElementById(id);let deferredPrompt=null;
+const val=(id,f="")=>$(id).value.trim()||f,pad=n=>String(n).padStart(2,"0");
+function today(){let d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function fd(v){if(!v)return"날짜를 선택해 주세요";let [y,m,d]=v.split("-").map(Number),dt=new Date(y,m-1,d),ds=["일","월","화","수","목","금","토"];return`${y}년 ${m}월 ${d}일 ${ds[dt.getDay()]}요일`}
+function ft(v){if(!v)return"시간을 선택해 주세요";let [h,m]=v.split(":").map(Number),ap=h<12?"오전":"오후";h=h%12||12;return`${ap} ${h}시${m?` ${m}분`:""}`}
+function rr(c,x,y,w,h,r,f){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();c.fillStyle=f;c.fill()}
+function fit(c,t,m,s,n){while(s>n){c.font=`700 ${s}px Malgun Gothic`;if(c.measureText(t).width<=m)break;s-=2}return s}
+function draw(){let c=$("canvas"),x=c.getContext("2d");x.fillStyle="#fffdf5";x.fillRect(0,0,1080,1350);rr(x,70,70,940,1210,44,"#fff");rr(x,120,120,840,160,34,"#FEE500");x.textAlign="center";x.fillStyle="#3A2F20";x.font="800 34px Malgun Gothic";x.fillText("약속 안내",540,178);x.font="800 54px Malgun Gothic";x.fillText("우리, 이때 만나요 😊",540,245);
+let customer=val("customer","고객님"),title=`${customer}과의 약속입니다`,s=fit(x,title,820,46,30);x.fillStyle="#222";x.font=`800 ${s}px Malgun Gothic`;x.fillText(title,540,360);
+let rows=[["날짜",fd($("date").value)],["시간",ft($("time").value)],["장소",val("place","장소를 입력해 주세요")],["내용",val("purpose","상담 일정")]],y=430;
+rows.forEach((r,i)=>{rr(x,130,y,820,120,26,i%2?"#f8f8f8":"#fffbea");x.textAlign="left";x.fillStyle="#8B7510";x.font="800 28px Malgun Gothic";x.fillText(r[0],175,y+48);x.fillStyle="#222";let z=fit(x,r[1],620,34,24);x.font=`700 ${z}px Malgun Gothic`;x.fillText(r[1],300,y+49);y+=140});
+x.textAlign="center";x.fillStyle="#666";x.font="500 27px Malgun Gothic";let my=1025;val("memo").split("\n").slice(0,3).forEach(t=>{x.fillText(t,540,my);my+=40});
+x.fillStyle="#222";x.font="800 34px Malgun Gothic";x.fillText(val("manager","담당자"),540,1150);if(val("phone")){x.fillStyle="#777";x.font="700 25px Malgun Gothic";x.fillText(val("phone"),540,1190)}
+rr(x,335,1220,410,62,31,"#FEE500");x.fillStyle="#3A2F20";x.font="800 25px Malgun Gothic";x.fillText(val("slogan"),540,1261);return c.toDataURL("image/png")}
+function make(){let data=draw(),p=$("preview"),d=$("downloadBtn"),s=$("shareBtn");p.src=data;p.style.display="block";d.href=data;d.download=`${$("date").value||"날짜미정"}_${val("customer","고객")}_약속안내.png`;d.style.display=s.style.display="block";$("status").innerHTML="<b>완성되었습니다.</b> 아래에서 저장하거나 공유하세요.";setTimeout(()=>p.scrollIntoView({behavior:"smooth"}),100)}
+$("makeBtn").onclick=make;$("shareBtn").onclick=()=>$("canvas").toBlob(async b=>{let f=new File([b],"약속안내.png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:"약속 안내 이미지"});else alert("PNG 저장 후 카카오톡에서 보내주세요.")});
+$("date").value=today();window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBtn").style.display="block"});$("installBtn").onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;$("installBtn").style.display="none"}};
+if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js"));
+</script></body></html>
