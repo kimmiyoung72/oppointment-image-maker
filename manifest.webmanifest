@@ -1,10 +1,10 @@
 {
-  "name": "김미영 고객관리",
-  "short_name": "고객관리",
+  "name": "수채화 약속 안내",
+  "short_name": "약속안내",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#F6F7F8",
-  "theme_color": "#FEE500",
+  "background_color": "#EFFBFA",
+  "theme_color": "#63D6D2",
   "icons": [
     {
       "src": "icon-192.png",
