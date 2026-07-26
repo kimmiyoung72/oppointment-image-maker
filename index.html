@@ -1,54 +1,138 @@
-<!doctype html><html lang="ko"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#FEE500"><link rel="manifest" href="manifest.webmanifest">
-<title>약속 이미지 메이커</title>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FEE500">
+<link rel="manifest" href="manifest.webmanifest">
+<title>김미영 고객관리</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f7f7f7;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#222}
-.wrap{max-width:760px;margin:auto;padding:16px}.card{background:#fff;border-radius:22px;padding:16px;margin:14px 0;box-shadow:0 6px 22px #00000010}
-h1{margin:6px 0 4px;font-size:25px}.lead,.tip{color:#777;font-size:14px;line-height:1.5}
-label{display:block;font-weight:800;font-size:14px;margin:12px 0 6px}
-input,textarea{width:100%;padding:13px;border:1px solid #e7e7e7;border-radius:14px;font-size:16px}textarea{min-height:78px}
+:root{--primary:#FEE500;--primaryText:#3A2F20;--bg:#F6F7F8;--card:#fff;--text:#222;--muted:#747B84;--line:#E6E8EB}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+.app{max-width:760px;margin:auto;padding:14px 14px 90px}
+header{display:flex;align-items:center;justify-content:space-between;margin:5px 2px 14px}
+header h1{font-size:24px;margin:0}.badge{background:var(--primary);color:var(--primaryText);padding:8px 11px;border-radius:999px;font-size:12px;font-weight:800}
+.tabs{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--bg);padding:7px 0 11px}
+.tab{border:0;border-radius:13px;padding:11px 3px;background:#EDEFF1;color:#555;font-size:13px;font-weight:800}
+.tab.active{background:var(--primary);color:var(--primaryText)}
+.page{display:none}.page.active{display:block}
+.card{background:var(--card);border-radius:20px;padding:16px;margin-bottom:13px;box-shadow:0 5px 20px #0000000d}
+.card h2{font-size:18px;margin:0 0 12px}
+label{display:block;margin:11px 0 6px;font-size:13px;font-weight:800}
+input,textarea,select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:#fff;font-size:15px;color:var(--text)}
+textarea{min-height:76px;resize:vertical}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-button,a.btn{width:100%;display:block;border:0;border-radius:14px;padding:14px;margin-top:10px;text-align:center;text-decoration:none;font-size:16px;font-weight:800}
-.primary{background:#FEE500;color:#3A2F20}.secondary{background:#f2f2f2;color:#333}.install{background:#fff8cc;color:#594a00;border:1px solid #f2dd5a}
-#preview{display:none;width:100%;border-radius:14px;box-shadow:0 10px 26px #00000025}
-#status{margin-top:10px;padding:11px;border-radius:12px;background:#fff9d8;color:#5b4c00;font-size:14px}
-canvas{display:none}@media(max-width:420px){.row{grid-template-columns:1fr}}
-</style></head><body><div class="wrap">
-<h1>약속 이미지 메이커</h1><p class="lead">고객과의 약속을 카카오톡에 보내기 좋은 이미지로 만듭니다.</p>
-<button id="installBtn" class="install" style="display:none">홈 화면에 앱 설치</button>
-<div class="card">
-<label>고객명</label><input id="customer" placeholder="예: 김민지 고객님">
-<div class="row"><div><label>날짜</label><input id="date" type="date"></div><div><label>시간</label><input id="time" type="time" value="14:00"></div></div>
-<label>장소</label><input id="place" placeholder="예: 성북구 ○○카페 2층">
-<label>상담 내용</label><input id="purpose" value="보험 보장 점검 및 계약 관리 상담">
-<label>안내 문구</label><textarea id="memo">약속 시간에 맞춰 찾아뵙겠습니다.
+button,.btn{border:0;border-radius:13px;padding:13px;font-size:15px;font-weight:800;text-decoration:none;text-align:center;display:block;cursor:pointer}
+.primary{width:100%;background:var(--primary);color:var(--primaryText);margin-top:12px}
+.secondary{width:100%;background:#EEF0F2;color:#333;margin-top:8px}
+.danger{background:#FFF0F0;color:#B42318}
+.small{padding:8px 10px;font-size:12px;width:auto;margin:0}
+.customer{border:1px solid var(--line);border-radius:15px;padding:13px;margin-top:9px}
+.customer-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.customer-name{font-size:16px;font-weight:900}.customer-sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.actions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.actions button{background:#F1F2F4;color:#333;padding:8px 10px;font-size:12px}
+.empty{text-align:center;color:var(--muted);padding:28px 10px}
+#preview{display:none;width:100%;border-radius:14px;box-shadow:0 8px 24px #00000020}
+.notice{font-size:13px;line-height:1.5;background:#FFF9D8;color:#5B4C00;border-radius:12px;padding:11px;margin-top:10px}
+.color-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input[type=color]{height:48px;padding:5px}
+canvas{display:none}
+@media(max-width:430px){.row,.color-grid{grid-template-columns:1fr}.tab{font-size:12px}}
+</style>
+</head>
+<body><div class="app">
+<header><h1 id="appTitle">김미영 고객관리</h1><span class="badge">업무용</span></header>
+<nav class="tabs">
+<button class="tab active" data-page="customers">고객</button>
+<button class="tab" data-page="appointment">약속 이미지</button>
+<button class="tab" data-page="records">상담 기록</button>
+<button class="tab" data-page="settings">디자인</button>
+</nav>
+
+<section id="customers" class="page active">
+<div class="card"><h2>고객 등록</h2>
+<div class="row"><div><label>고객명</label><input id="cName" placeholder="예: 김민지"></div><div><label>연락처</label><input id="cPhone" placeholder="010-0000-0000"></div></div>
+<label>자주 만나는 장소</label><input id="cPlace" placeholder="예: 길음역 ○○카페">
+<label>가입 상품·관심 보장</label><input id="cProduct" placeholder="예: 암보험, 재가보험">
+<label>특이사항</label><textarea id="cMemo" placeholder="가족력, 상담 시 주의할 점 등"></textarea>
+<button class="primary" id="saveCustomer">고객 저장</button></div>
+<div class="card"><h2>저장된 고객</h2><input id="searchCustomer" placeholder="고객명 또는 연락처 검색"><div id="customerList"></div></div>
+</section>
+
+<section id="appointment" class="page">
+<div class="card"><h2>약속 안내 만들기</h2>
+<label>저장 고객 불러오기</label><select id="appointmentCustomer"><option value="">직접 입력</option></select>
+<label>고객명</label><input id="aName" placeholder="예: 김민지 고객님">
+<div class="row"><div><label>날짜</label><input id="aDate" type="date"></div><div><label>시간</label><input id="aTime" type="time" value="14:00"></div></div>
+<label>장소</label><input id="aPlace" placeholder="예: 성북구 ○○카페 2층">
+<label>상담 내용</label><input id="aPurpose" value="보험 보장 점검 및 계약 관리 상담">
+<label>안내 문구</label><textarea id="aMemo">약속 시간에 맞춰 찾아뵙겠습니다.
 변경이 필요하시면 편하게 연락 주세요.</textarea>
-<div class="row"><div><label>담당자</label><input id="manager" value="김미영 팀장"></div><div><label>연락처</label><input id="phone" placeholder="010-0000-0000"></div></div>
-<label>하단 문구</label><input id="slogan" value="가입보다 관리가 중요합니다.">
-<button id="makeBtn" class="primary">이미지 만들기</button><div id="status">정보를 입력한 뒤 버튼을 눌러주세요.</div>
+<button class="primary" id="makeImage">이미지 만들기</button>
+<div class="notice" id="imageStatus">정보를 입력한 뒤 이미지를 만들어 주세요.</div></div>
+<div class="card"><img id="preview"><a id="download" class="btn secondary" style="display:none">PNG 저장</a><button id="share" class="secondary" style="display:none">카카오톡 등으로 공유</button></div>
+</section>
+
+<section id="records" class="page">
+<div class="card"><h2>상담 기록 추가</h2>
+<label>고객</label><select id="recordCustomer"><option value="">고객 선택</option></select>
+<label>상담일</label><input id="rDate" type="date">
+<label>상담 내용</label><textarea id="rContent" placeholder="설계 방향, 고객 반응, 다음 행동"></textarea>
+<label>다음 연락 예정일</label><input id="rNext" type="date">
+<button class="primary" id="saveRecord">상담 기록 저장</button></div>
+<div class="card"><h2>최근 상담 기록</h2><div id="recordList"></div></div>
+</section>
+
+<section id="settings" class="page">
+<div class="card"><h2>프로필·문구 설정</h2>
+<label>앱 제목</label><input id="sTitle">
+<div class="row"><div><label>담당자명</label><input id="sManager"></div><div><label>연락처</label><input id="sPhone"></div></div>
+<label>하단 문구</label><input id="sSlogan">
+<label>약속 카드 제목</label><input id="sCardTitle">
 </div>
-<div class="card"><img id="preview"><a id="downloadBtn" class="btn secondary" style="display:none">PNG 저장</a>
-<button id="shareBtn" class="secondary" style="display:none">카카오톡 등으로 공유</button>
-<p class="tip">저장 이미지는 보통 휴대폰의 다운로드 폴더에 들어갑니다.</p></div>
-<canvas id="canvas" width="1080" height="1350"></canvas></div>
+<div class="card"><h2>색상 직접 바꾸기</h2>
+<div class="color-grid"><div><label>포인트 색상</label><input id="sPrimary" type="color"></div><div><label>글자 색상</label><input id="sPrimaryText" type="color"></div></div>
+<button class="primary" id="saveSettings">디자인 저장</button>
+<button class="secondary danger" id="resetSettings">기본 디자인으로 되돌리기</button>
+<div class="notice">색상과 문구는 미영님이 언제든 직접 바꿀 수 있습니다. 저장한 설정은 현재 스마트폰에 유지됩니다.</div></div>
+</section>
+
+<canvas id="canvas" width="1080" height="1350"></canvas>
+</div>
 <script>
-const $=id=>document.getElementById(id);let deferredPrompt=null;
-const val=(id,f="")=>$(id).value.trim()||f,pad=n=>String(n).padStart(2,"0");
-function today(){let d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
-function fd(v){if(!v)return"날짜를 선택해 주세요";let [y,m,d]=v.split("-").map(Number),dt=new Date(y,m-1,d),ds=["일","월","화","수","목","금","토"];return`${y}년 ${m}월 ${d}일 ${ds[dt.getDay()]}요일`}
-function ft(v){if(!v)return"시간을 선택해 주세요";let [h,m]=v.split(":").map(Number),ap=h<12?"오전":"오후";h=h%12||12;return`${ap} ${h}시${m?` ${m}분`:""}`}
+const $=id=>document.getElementById(id);
+const K={customers:"crm_customers_v2",records:"crm_records_v2",settings:"crm_settings_v2"};
+const defaults={title:"김미영 고객관리",manager:"김미영 팀장",phone:"010-0000-0000",slogan:"가입보다 관리가 중요합니다.",cardTitle:"우리, 이때 만나요 😊",primary:"#FEE500",primaryText:"#3A2F20"};
+let customers=JSON.parse(localStorage.getItem(K.customers)||"[]");
+let records=JSON.parse(localStorage.getItem(K.records)||"[]");
+let settings={...defaults,...JSON.parse(localStorage.getItem(K.settings)||"{}")};
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const esc=s=>(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const pad=n=>String(n).padStart(2,"0");
+const today=()=>{let d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const formatDate=v=>{if(!v)return"날짜 미정";let [y,m,d]=v.split("-").map(Number),x=new Date(y,m-1,d),days=["일","월","화","수","목","금","토"];return`${y}년 ${m}월 ${d}일 ${days[x.getDay()]}요일`};
+const formatTime=v=>{if(!v)return"시간 미정";let [h,m]=v.split(":").map(Number),ap=h<12?"오전":"오후";h=h%12||12;return`${ap} ${h}시${m?` ${m}분`:""}`};
+function applySettings(){document.documentElement.style.setProperty("--primary",settings.primary);document.documentElement.style.setProperty("--primaryText",settings.primaryText);$("appTitle").textContent=settings.title;$("sTitle").value=settings.title;$("sManager").value=settings.manager;$("sPhone").value=settings.phone;$("sSlogan").value=settings.slogan;$("sCardTitle").value=settings.cardTitle;$("sPrimary").value=settings.primary;$("sPrimaryText").value=settings.primaryText}
+function renderCustomers(q=""){let list=customers.filter(c=>(c.name+c.phone).toLowerCase().includes(q.toLowerCase()));$("customerList").innerHTML=list.length?list.map(c=>`<div class="customer"><div class="customer-top"><div><div class="customer-name">${esc(c.name)}</div><div class="customer-sub">${esc(c.phone||"연락처 없음")}<br>${esc(c.product||"관심 보장 미입력")}</div></div></div><div class="actions"><button onclick="useCustomer('${c.id}')">약속 만들기</button><button onclick="callCustomer('${esc(c.phone)}')">전화</button><button onclick="deleteCustomer('${c.id}')">삭제</button></div></div>`).join(""):'<div class="empty">저장된 고객이 없습니다.</div>';refreshSelects()}
+function refreshSelects(){let opts='<option value="">고객 선택</option>'+customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");$("recordCustomer").innerHTML=opts;$("appointmentCustomer").innerHTML='<option value="">직접 입력</option>'+customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}
+function renderRecords(){let sorted=[...records].sort((a,b)=>b.date.localeCompare(a.date));$("recordList").innerHTML=sorted.length?sorted.map(r=>{let c=customers.find(x=>x.id===r.customerId);return`<div class="customer"><div class="customer-name">${esc(c?c.name:"삭제된 고객")}</div><div class="customer-sub">${esc(r.date)} · 다음 연락 ${esc(r.next||"미정")}<br>${esc(r.content)}</div></div>`}).join(""):'<div class="empty">상담 기록이 없습니다.</div>'}
+$("saveCustomer").onclick=()=>{let name=$("cName").value.trim();if(!name)return alert("고객명을 입력해 주세요.");customers.unshift({id:Date.now().toString(),name,phone:$("cPhone").value.trim(),place:$("cPlace").value.trim(),product:$("cProduct").value.trim(),memo:$("cMemo").value.trim()});save(K.customers,customers);["cName","cPhone","cPlace","cProduct","cMemo"].forEach(id=>$(id).value="");renderCustomers();alert("고객을 저장했습니다.")};
+window.deleteCustomer=id=>{if(confirm("이 고객을 삭제할까요?")){customers=customers.filter(c=>c.id!==id);save(K.customers,customers);renderCustomers();renderRecords()}};
+window.callCustomer=phone=>{if(phone)location.href="tel:"+phone;else alert("연락처가 없습니다.")};
+window.useCustomer=id=>{let c=customers.find(x=>x.id===id);if(!c)return;$("aName").value=c.name+" 고객님";$("aPlace").value=c.place||"";showPage("appointment")};
+$("appointmentCustomer").onchange=e=>{let c=customers.find(x=>x.id===e.target.value);if(c){$("aName").value=c.name+" 고객님";$("aPlace").value=c.place||""}};
+$("saveRecord").onclick=()=>{if(!$("recordCustomer").value)return alert("고객을 선택해 주세요.");if(!$("rContent").value.trim())return alert("상담 내용을 입력해 주세요.");records.unshift({id:Date.now().toString(),customerId:$("recordCustomer").value,date:$("rDate").value,content:$("rContent").value.trim(),next:$("rNext").value});save(K.records,records);$("rContent").value="";renderRecords();alert("상담 기록을 저장했습니다.")};
+$("searchCustomer").oninput=e=>renderCustomers(e.target.value);
+function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.page===id));window.scrollTo(0,0)}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>showPage(t.dataset.page));
+$("saveSettings").onclick=()=>{settings={title:$("sTitle").value.trim()||defaults.title,manager:$("sManager").value.trim(),phone:$("sPhone").value.trim(),slogan:$("sSlogan").value.trim(),cardTitle:$("sCardTitle").value.trim(),primary:$("sPrimary").value,primaryText:$("sPrimaryText").value};save(K.settings,settings);applySettings();alert("디자인을 저장했습니다.")};
+$("resetSettings").onclick=()=>{settings={...defaults};save(K.settings,settings);applySettings()};
 function rr(c,x,y,w,h,r,f){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();c.fillStyle=f;c.fill()}
-function fit(c,t,m,s,n){while(s>n){c.font=`700 ${s}px Malgun Gothic`;if(c.measureText(t).width<=m)break;s-=2}return s}
-function draw(){let c=$("canvas"),x=c.getContext("2d");x.fillStyle="#fffdf5";x.fillRect(0,0,1080,1350);rr(x,70,70,940,1210,44,"#fff");rr(x,120,120,840,160,34,"#FEE500");x.textAlign="center";x.fillStyle="#3A2F20";x.font="800 34px Malgun Gothic";x.fillText("약속 안내",540,178);x.font="800 54px Malgun Gothic";x.fillText("우리, 이때 만나요 😊",540,245);
-let customer=val("customer","고객님"),title=`${customer}과의 약속입니다`,s=fit(x,title,820,46,30);x.fillStyle="#222";x.font=`800 ${s}px Malgun Gothic`;x.fillText(title,540,360);
-let rows=[["날짜",fd($("date").value)],["시간",ft($("time").value)],["장소",val("place","장소를 입력해 주세요")],["내용",val("purpose","상담 일정")]],y=430;
-rows.forEach((r,i)=>{rr(x,130,y,820,120,26,i%2?"#f8f8f8":"#fffbea");x.textAlign="left";x.fillStyle="#8B7510";x.font="800 28px Malgun Gothic";x.fillText(r[0],175,y+48);x.fillStyle="#222";let z=fit(x,r[1],620,34,24);x.font=`700 ${z}px Malgun Gothic`;x.fillText(r[1],300,y+49);y+=140});
-x.textAlign="center";x.fillStyle="#666";x.font="500 27px Malgun Gothic";let my=1025;val("memo").split("\n").slice(0,3).forEach(t=>{x.fillText(t,540,my);my+=40});
-x.fillStyle="#222";x.font="800 34px Malgun Gothic";x.fillText(val("manager","담당자"),540,1150);if(val("phone")){x.fillStyle="#777";x.font="700 25px Malgun Gothic";x.fillText(val("phone"),540,1190)}
-rr(x,335,1220,410,62,31,"#FEE500");x.fillStyle="#3A2F20";x.font="800 25px Malgun Gothic";x.fillText(val("slogan"),540,1261);return c.toDataURL("image/png")}
-function make(){let data=draw(),p=$("preview"),d=$("downloadBtn"),s=$("shareBtn");p.src=data;p.style.display="block";d.href=data;d.download=`${$("date").value||"날짜미정"}_${val("customer","고객")}_약속안내.png`;d.style.display=s.style.display="block";$("status").innerHTML="<b>완성되었습니다.</b> 아래에서 저장하거나 공유하세요.";setTimeout(()=>p.scrollIntoView({behavior:"smooth"}),100)}
-$("makeBtn").onclick=make;$("shareBtn").onclick=()=>$("canvas").toBlob(async b=>{let f=new File([b],"약속안내.png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:"약속 안내 이미지"});else alert("PNG 저장 후 카카오톡에서 보내주세요.")});
-$("date").value=today();window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBtn").style.display="block"});$("installBtn").onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;$("installBtn").style.display="none"}};
+function fit(c,t,max,s,min){while(s>min){c.font=`700 ${s}px Malgun Gothic`;if(c.measureText(t).width<=max)break;s-=2}return s}
+function drawImage(){let c=$("canvas"),x=c.getContext("2d");x.fillStyle="#FFFDF5";x.fillRect(0,0,1080,1350);rr(x,70,70,940,1210,44,"#fff");rr(x,120,120,840,160,34,settings.primary);x.textAlign="center";x.fillStyle=settings.primaryText;x.font="800 34px Malgun Gothic";x.fillText("약속 안내",540,178);x.font="800 54px Malgun Gothic";x.fillText(settings.cardTitle,540,245);let name=$("aName").value.trim()||"고객님",title=`${name}과의 약속입니다`,s=fit(x,title,820,46,30);x.fillStyle="#222";x.font=`800 ${s}px Malgun Gothic`;x.fillText(title,540,360);let rows=[["날짜",formatDate($("aDate").value)],["시간",formatTime($("aTime").value)],["장소",$("aPlace").value.trim()||"장소를 입력해 주세요"],["내용",$("aPurpose").value.trim()||"상담 일정"]],y=430;rows.forEach((r,i)=>{rr(x,130,y,820,120,26,i%2?"#F8F8F8":"#FFFBEA");x.textAlign="left";x.fillStyle="#8B7510";x.font="800 28px Malgun Gothic";x.fillText(r[0],175,y+48);x.fillStyle="#222";let z=fit(x,r[1],620,34,23);x.font=`700 ${z}px Malgun Gothic`;x.fillText(r[1],300,y+49);y+=140});x.textAlign="center";x.fillStyle="#666";x.font="500 27px Malgun Gothic";let my=1025;($("aMemo").value||"").split("\n").slice(0,3).forEach(t=>{x.fillText(t,540,my);my+=40});x.fillStyle="#222";x.font="800 34px Malgun Gothic";x.fillText(settings.manager,540,1150);if(settings.phone){x.fillStyle="#777";x.font="700 25px Malgun Gothic";x.fillText(settings.phone,540,1190)}rr(x,335,1220,410,62,31,settings.primary);x.fillStyle=settings.primaryText;x.font="800 25px Malgun Gothic";x.fillText(settings.slogan,540,1261);return c.toDataURL("image/png")}
+$("makeImage").onclick=()=>{let data=drawImage(),p=$("preview"),d=$("download"),s=$("share");p.src=data;p.style.display="block";d.href=data;d.download=`${$("aDate").value||"날짜미정"}_약속안내.png`;d.style.display=s.style.display="block";$("imageStatus").innerHTML="<b>이미지가 완성되었습니다.</b> 아래에서 저장하거나 공유하세요.";setTimeout(()=>p.scrollIntoView({behavior:"smooth"}),100)};
+$("share").onclick=()=>$("canvas").toBlob(async b=>{let f=new File([b],"약속안내.png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:"약속 안내"});else alert("PNG 저장 후 카카오톡에서 보내주세요.")});
+$("aDate").value=$("rDate").value=today();applySettings();renderCustomers();renderRecords();
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js"));
 </script></body></html>
